@@ -1,0 +1,28 @@
+{
+	"name": "Mouse",
+	"title": "Mouse",
+	"description": "Mouse state and event manager",
+	"version": "0.1.0",
+	"homepage": "https://github.com/jkroso/Mouse",
+	"author": {
+		"name": "Jakeb Rosoman",
+		"email": "jkroso@gmail.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/jkroso/Mouse.git"
+	},
+	"bugs": {
+		"url": "https://trello.com/board/mouse/"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "https://github.com/jkroso/Mouse/master/LICENSE-MIT"
+		}
+	],
+	"dependencies": {
+		"grunt-requirejs": ""
+	},
+	"keywords": []
+}
