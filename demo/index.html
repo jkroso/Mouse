@@ -8,6 +8,21 @@
 				width: 200px;
 				margin: 50px auto;
 			}
+			#counter {
+				position: fixed;
+				top:20px;
+				right:20px;
+				width:200px;
+				background: white;
+				border:1px solid #ccc;
+				border-radius: 5px;
+				padding: 10px;
+				text-align: right;
+				box-shadow: 0 0 7px -1px rgba(0,0,0,.3); 
+			}
+			span {
+				margin: 4px;
+			}
 			#list1 {
 				background: #CCECFF;
 			}
@@ -20,11 +35,15 @@
 				padding: 10px;
 				position: relative;
 				background: #ccc;
+				cursor: move;
 			}
 		</style>
 		<script data-main="demo" src="../vendor/require.js"></script>
 	</head>
 	<body>
+		<div id="counter">
+			<span id="count">0</span><span>Ops/sec</span>
+		</div>
 		<ul id="list1">
 			<li class="item">One</li>
 			<li class="item">Two</li>
