@@ -2,7 +2,7 @@
 // 
 // Provides a `Mouse` class, which in most cases there should only be a single instance of. `Mouse` is automatically instantiated on the window and tracks the mouse state independent of specific elements. It also leverages this state and an _SignalTree_ dependency to provide an enhanced DOM event interface. To attatch an event use `element.on('down.left', function (e) {console.log(e.name)})`. To remove that event us `element.off('down.left')`
 
-define(['Button'], function (Button) { 'use strict';
+define(['./Button'], function (Button) { 'use strict';
 
     var bitMask = Object.freeze([1, 2, 4])
 
@@ -74,42 +74,42 @@ define(['Button'], function (Button) { 'use strict';
                 e.movementX = e.webkitMovementX
                 e.movementY = e.webkitMovementY
                 // Some browsers fire move events when they shouldn't
-                if ( e.movementX || e.movementY ) {
-                    // If the mouse is being dragged...
-                    if ( self.buttons ) {
-                        // ...the event will be re-created with the correct target
-                        self[self.buttons].onMove(e)
-                    } else {
-                        var i, moveEvents = ['move']
-                        
-                        if ( e.movementY > 0 )
-                            moveEvents.push(['up'])
-                        else if ( e.movementY < 0 )
-                            moveEvents.push(['down'])
-
-                        if ( e.movementX > 0 )
-                            moveEvents.push(['right'])
-                        else if ( e.movementX < 0 )
-                            moveEvents.push(['left'])
-                            
-                        e.types = [moveEvents]
-                        e.branching = true
-                        // Check if any actions are to be applied before the move event is published
-                        if ( i = self._beforeMove.length ) {
-                            // De-ref the listener array now in case one of them mutates the array
-                            moveEvents = self._beforeMove // re-using the variable
-                            do {
-                                moveEvents[--i](e, self)
-                            } while ( i )
-                        }
-                    }
-                    self.x = e.x
-                    self.y = e.y
-                    self.update(e)
-                } else {
+                if ( !(e.movementX || e.movementY) ) {
                     e.stopPropagation()
                     e.stopImmediatePropagation()
-                } 
+                    return
+                }
+                // If the mouse is being dragged
+                if ( self.buttons ) {
+                    self[self.buttons].onMove(e)
+                    // e.stopPropagation()
+                    // e.stopImmediatePropagation()
+                }
+                var i, moveEvents = ['move']
+                
+                if ( e.movementY > 0 )
+                    moveEvents.push(['up'])
+                else if ( e.movementY < 0 )
+                    moveEvents.push(['down'])
+
+                if ( e.movementX > 0 )
+                    moveEvents.push(['right'])
+                else if ( e.movementX < 0 )
+                    moveEvents.push(['left'])
+                    
+                e.types = [moveEvents]
+                // Check if any actions are to be applied before the move event is published
+                if ( i = self._beforeMove.length ) {
+                    // De-ref the listener array now in case one of them mutates the array
+                    moveEvents = self._beforeMove // re-using the variable
+                    do {
+                        moveEvents[--i](e, self)
+                    } while ( i )
+                }
+                
+                self.x = e.x
+                self.y = e.y
+                self.update(e)
             },
             // drag : function (e) {
             //     var dragAspects = self._beforeDrag,

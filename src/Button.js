@@ -37,8 +37,6 @@ define(function () {
                 event.types = ['drop', this.name]
                 event.name = 'drop.'+this.name
                 this.lastDown.target.dispatchEvent(event)
-                e.stopPropagation()
-                e.stopImmediatePropagation()
             } else if ( e.target === this.lastDown.target && e.timeStamp - this.lastDown.timeStamp < 350 ) {
                 e.types = [['click', [this.name]]]
             } else
@@ -80,8 +78,6 @@ define(function () {
             event.totalY = e.y - this.lastDown.y
             event.name = 'drag.'+this.name
             this.lastDown.target.dispatchEvent(event)
-            e.stopPropagation()
-            e.stopImmediatePropagation()
         }
     }
 

@@ -12,12 +12,8 @@ module.exports = function(grunt) { 'use strict';
 				' Licensed <%= _.pluck(pkg.licenses, "type").join(", ") %> */'
 		},
 		requirejs: {
-            baseUrl : ".",
-            paths : {
-                Mouse: 'src/Mouse',
-                Button: 'src/Button'
-            },
-            include:'Mouse',
+            baseUrl : "src",
+            name: 'Mouse',
             out : 'dist/Mouse.js',
             optimize : "none"
         },

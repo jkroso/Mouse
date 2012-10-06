@@ -1,4 +1,4 @@
-/*! Mouse - v0.1.0 - 2012-10-05
+/*! Mouse - v0.1.0 - 2012-10-06
 * https://github.com/jkroso/Mouse
 * Copyright (c) 2012 Jakeb Rosoman; Licensed MIT */
 
@@ -33,7 +33,7 @@ define('Button',[],function () {
         onUp : function (e) {
             if ( this.dragging ) {
                 this.dragging = false
-                var event = new CustomEvent('l', {
+                var event = new CustomEvent('library', {
                     bubbles : true,
                     cancelable : true
                 })
@@ -42,8 +42,6 @@ define('Button',[],function () {
                 event.types = ['drop', this.name]
                 event.name = 'drop.'+this.name
                 this.lastDown.target.dispatchEvent(event)
-                e.stopPropagation()
-                e.stopImmediatePropagation()
             } else if ( e.target === this.lastDown.target && e.timeStamp - this.lastDown.timeStamp < 350 ) {
                 e.types = [['click', [this.name]]]
             } else
@@ -59,7 +57,7 @@ define('Button',[],function () {
             if ( !this.dragging ) {
                 // We need to publish a grab event separately before any other events as this will allow drag listeners to be added 
                 this.dragging = true
-                event = new Event('l', {
+                event = new Event('library', {
                     bubbles : true,
                     cancelable : true
                 })
@@ -70,7 +68,7 @@ define('Button',[],function () {
                 this.lastDown.target.dispatchEvent(event)
             }
             // When dragging the target should always be the one clicked on. To enable this to be true we need to create a custom event. I tried canceling the move event an re-dispatching it towards the correct target but this throws `DOM_exception error 1`
-            event = new Event('l', {
+            event = new Event('library', {
                 bubbles : true,
                 cancelable : true
             })
@@ -85,8 +83,6 @@ define('Button',[],function () {
             event.totalY = e.y - this.lastDown.y
             event.name = 'drag.'+this.name
             this.lastDown.target.dispatchEvent(event)
-            e.stopPropagation()
-            e.stopImmediatePropagation()
         }
     }
 
@@ -96,7 +92,7 @@ define('Button',[],function () {
 // 
 // Provides a `Mouse` class, which in most cases there should only be a single instance of. `Mouse` is automatically instantiated on the window and tracks the mouse state independent of specific elements. It also leverages this state and an _SignalTree_ dependency to provide an enhanced DOM event interface. To attatch an event use `element.on('down.left', function (e) {console.log(e.name)})`. To remove that event us `element.off('down.left')`
 
-define('Mouse',['Button'], function (Button) { 
+define('Mouse',['./Button'], function (Button) { 
 
     var bitMask = Object.freeze([1, 2, 4])
 
@@ -129,11 +125,11 @@ define('Mouse',['Button'], function (Button) {
         
         // `this` will refer to a DOM element when triggered
         var stateHandlers = {
-            click: function (e) {
-                e.preventDefault()
-                // e.stopPropagation()
-                // e.stopImmediatePropagation()
-            },
+            // click: function (e) {
+            //     // e.preventDefault()
+            //     // e.stopPropagation()
+            //     // e.stopImmediatePropagation()
+            // },
             mousedown : function (e) {
                 // Add the button to the front of a linked list of active buttons
                 if ( self.down )
@@ -168,42 +164,42 @@ define('Mouse',['Button'], function (Button) {
                 e.movementX = e.webkitMovementX
                 e.movementY = e.webkitMovementY
                 // Some browsers fire move events when they shouldn't
-                if ( e.movementX || e.movementY ) {
-                    // If the mouse is being dragged...
-                    if ( self.buttons ) {
-                        // ...the event will be re-created with the correct target
-                        self[self.buttons].onMove(e)
-                    } else {
-                        var i, moveEvents = ['move']
-                        
-                        if ( e.movementY > 0 )
-                            moveEvents.push(['up'])
-                        else if ( e.movementY < 0 )
-                            moveEvents.push(['down'])
-
-                        if ( e.movementX > 0 )
-                            moveEvents.push(['right'])
-                        else if ( e.movementX < 0 )
-                            moveEvents.push(['left'])
-                            
-                        e.types = [moveEvents]
-                        e.branching = true
-                        // Check if any actions are to be applied before the move event is published
-                        if ( i = self._beforeMove.length ) {
-                            // De-ref the listener array now in case one of them mutates the array
-                            moveEvents = self._beforeMove // re-using the variable
-                            do {
-                                moveEvents[--i](e, self)
-                            } while ( i )
-                        }
-                    }
-                    self.x = e.x
-                    self.y = e.y
-                    self.update(e)
-                } else {
+                if ( !(e.movementX || e.movementY) ) {
                     e.stopPropagation()
                     e.stopImmediatePropagation()
-                } 
+                    return
+                }
+                // If the mouse is being dragged
+                if ( self.buttons ) {
+                    self[self.buttons].onMove(e)
+                    // e.stopPropagation()
+                    // e.stopImmediatePropagation()
+                }
+                var i, moveEvents = ['move']
+                
+                if ( e.movementY > 0 )
+                    moveEvents.push(['up'])
+                else if ( e.movementY < 0 )
+                    moveEvents.push(['down'])
+
+                if ( e.movementX > 0 )
+                    moveEvents.push(['right'])
+                else if ( e.movementX < 0 )
+                    moveEvents.push(['left'])
+                    
+                e.types = [moveEvents]
+                // Check if any actions are to be applied before the move event is published
+                if ( i = self._beforeMove.length ) {
+                    // De-ref the listener array now in case one of them mutates the array
+                    moveEvents = self._beforeMove // re-using the variable
+                    do {
+                        moveEvents[--i](e, self)
+                    } while ( i )
+                }
+                
+                self.x = e.x
+                self.y = e.y
+                self.update(e)
             },
             // drag : function (e) {
             //     var dragAspects = self._beforeDrag,
