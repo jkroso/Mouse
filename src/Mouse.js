@@ -35,6 +35,11 @@ define(['Button'], function (Button) { 'use strict';
         
         // `this` will refer to a DOM element when triggered
         var stateHandlers = {
+            // click: function (e) {
+            //     // e.preventDefault()
+            //     // e.stopPropagation()
+            //     // e.stopImmediatePropagation()
+            // },
             mousedown : function (e) {
                 // Add the button to the front of a linked list of active buttons
                 if ( self.down )
@@ -43,7 +48,7 @@ define(['Button'], function (Button) { 'use strict';
                 self.buttons += bitMask[e.button]
                 // Delegate the event to the correct button
                 self[self.buttons].onDown(e)
-                self.sequence(e)
+                // self.sequence(e)
                 self.update(e)
             },
             mouseup : function (e) {
@@ -60,7 +65,8 @@ define(['Button'], function (Button) { 'use strict';
                     } while ( downEvent = downEvent.previousDown )
                 }
                 // Delegate the event to the correct button
-                self.sequence(self[self.buttons].onUp(e))
+                // self.sequence()
+                self[self.buttons].onUp(e)
                 self.buttons -= bitMask[e.button]
                 self.update(e)
             },
@@ -105,15 +111,15 @@ define(['Button'], function (Button) { 'use strict';
                     e.stopImmediatePropagation()
                 } 
             },
-            drag : function (e) {
-                var dragAspects = self._beforeDrag,
-                    i = dragAspects.length
-                if ( i ) {
-                    do {
-                        dragAspects[--i](e, self)
-                    } while ( i )
-                }
-            },
+            // drag : function (e) {
+            //     var dragAspects = self._beforeDrag,
+            //         i = dragAspects.length
+            //     if ( i ) {
+            //         do {
+            //             dragAspects[--i](e, self)
+            //         } while ( i )
+            //     }
+            // },
             mousewheel: function (e) {
                 if ( e.wheelDelta > 0 )
                     e.types = [['wheel', ['up']]]
@@ -125,7 +131,7 @@ define(['Button'], function (Button) { 'use strict';
                 else if ( e.wheelDeltaX < 0 )
                     e.types[0].push(['right'])
 
-                self.sequence(e)
+                // self.sequence(e)
                 self.update(e)
             },
             mouseover: function (e) {
@@ -133,14 +139,16 @@ define(['Button'], function (Button) { 'use strict';
                     self.active = true
                     self.update(e)
                 }
-                e.types = [['over']]
+                e.types = ['over']
+                e.name = 'over'
             },
             mouseout: function (e) {
                 if (e.relatedTarget === null) {
                     self.active = false
                     self.update(e)
                 }
-                e.types = [['out']]
+                e.types = ['out']
+                e.name = 'out'
             }
             /*FIXEME: the contextmenu prevents any events from being triggerd if they occur over it. This often leads to miscalculated `mouse.buttons`.
             contextmenu : function (e) {

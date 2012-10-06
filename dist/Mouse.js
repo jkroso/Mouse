@@ -1,4 +1,4 @@
-/*! Mouse - v0.1.0 - 2012-10-04
+/*! Mouse - v0.1.0 - 2012-10-05
 * https://github.com/jkroso/Mouse
 * Copyright (c) 2012 Jakeb Rosoman; Licensed MIT */
 
@@ -21,9 +21,9 @@ define('Button',[],function () {
         constructor : Button,
         onDown : function (e) {
             if ( e.target === this.lastDown.target && e.timeStamp - this.lastDown.timeStamp < 350 )
-                e.types = [['double',[this.name]]]
+                e.types = ['double', this.name]
             else 
-                e.types = [['down',[this.name]]]
+                e.types = ['down', this.name]
 
             this.lastActivity = e.timeStamp
             this.down = true
@@ -33,7 +33,7 @@ define('Button',[],function () {
         onUp : function (e) {
             if ( this.dragging ) {
                 this.dragging = false
-                var event = new CustomEvent('drop', {
+                var event = new CustomEvent('l', {
                     bubbles : true,
                     cancelable : true
                 })
@@ -41,14 +41,13 @@ define('Button',[],function () {
                 event.y = e.y
                 event.types = ['drop', this.name]
                 event.name = 'drop.'+this.name
+                this.lastDown.target.dispatchEvent(event)
                 e.stopPropagation()
                 e.stopImmediatePropagation()
-                this.lastDown.target.dispatchEvent(event)
             } else if ( e.target === this.lastDown.target && e.timeStamp - this.lastDown.timeStamp < 350 ) {
                 e.types = [['click', [this.name]]]
             } else
                 e.types = [['up', [this.name]]]
-            e.branching = true
             
             this.down = false
             this.last = this.lastUp = e
@@ -57,26 +56,10 @@ define('Button',[],function () {
         },
         onMove : function (e) {
             var event
-            if ( this.dragging ) {
-                // When dragging the target should always be the one clicked on. To enable this to be true we need to create a custom event. I tried canceling the move event an re-dispatching it towards the correct target but this throws an `DOM_exception error 1`
-                event = new Event('drag', {
-                    bubbles : true,
-                    cancelable : true
-                })
-                event.types = ['drag', this.name]
-                // Movement is change in mouse position...
-                event.movementX = e.webkitMovementX
-                event.movementY = e.webkitMovementY
-                // ...while Delta is the movement occuring on the button
-                event.deltaX = (event.x = e.x) - this.last.x
-                event.deltaY = (event.y = e.y) - this.last.y
-                event.totalX = e.x - this.lastDown.x
-                event.totalY = e.y - this.lastDown.y
-                event.name = 'drag.'+this.name
-            } else {
-                this.dragging = true
+            if ( !this.dragging ) {
                 // We need to publish a grab event separately before any other events as this will allow drag listeners to be added 
-                event = new Event('grab', {
+                this.dragging = true
+                event = new Event('l', {
                     bubbles : true,
                     cancelable : true
                 })
@@ -84,10 +67,26 @@ define('Button',[],function () {
                 event.y = this.lastDown.y
                 event.types = ['grab', this.name]
                 event.name = 'grab.'+this.name
+                this.lastDown.target.dispatchEvent(event)
             }
+            // When dragging the target should always be the one clicked on. To enable this to be true we need to create a custom event. I tried canceling the move event an re-dispatching it towards the correct target but this throws `DOM_exception error 1`
+            event = new Event('l', {
+                bubbles : true,
+                cancelable : true
+            })
+            event.types = ['drag', this.name]
+            // Movement is change in mouse position
+            event.movementX = e.movementX
+            event.movementY = e.movementY
+            // Delta is the movement occuring on the button
+            event.deltaX = (event.x = e.x) - this.last.x
+            event.deltaY = (event.y = e.y) - this.last.y
+            event.totalX = e.x - this.lastDown.x
+            event.totalY = e.y - this.lastDown.y
+            event.name = 'drag.'+this.name
+            this.lastDown.target.dispatchEvent(event)
             e.stopPropagation()
             e.stopImmediatePropagation()
-            this.lastDown.target.dispatchEvent(event)
         }
     }
 
@@ -130,6 +129,11 @@ define('Mouse',['Button'], function (Button) {
         
         // `this` will refer to a DOM element when triggered
         var stateHandlers = {
+            click: function (e) {
+                e.preventDefault()
+                // e.stopPropagation()
+                // e.stopImmediatePropagation()
+            },
             mousedown : function (e) {
                 // Add the button to the front of a linked list of active buttons
                 if ( self.down )
@@ -138,7 +142,7 @@ define('Mouse',['Button'], function (Button) {
                 self.buttons += bitMask[e.button]
                 // Delegate the event to the correct button
                 self[self.buttons].onDown(e)
-                self.sequence(e)
+                // self.sequence(e)
                 self.update(e)
             },
             mouseup : function (e) {
@@ -155,7 +159,8 @@ define('Mouse',['Button'], function (Button) {
                     } while ( downEvent = downEvent.previousDown )
                 }
                 // Delegate the event to the correct button
-                self.sequence(self[self.buttons].onUp(e))
+                // self.sequence()
+                self[self.buttons].onUp(e)
                 self.buttons -= bitMask[e.button]
                 self.update(e)
             },
@@ -200,15 +205,15 @@ define('Mouse',['Button'], function (Button) {
                     e.stopImmediatePropagation()
                 } 
             },
-            drag : function (e) {
-                var dragAspects = self._beforeDrag,
-                    i = dragAspects.length
-                if ( i ) {
-                    do {
-                        dragAspects[--i](e, self)
-                    } while ( i )
-                }
-            },
+            // drag : function (e) {
+            //     var dragAspects = self._beforeDrag,
+            //         i = dragAspects.length
+            //     if ( i ) {
+            //         do {
+            //             dragAspects[--i](e, self)
+            //         } while ( i )
+            //     }
+            // },
             mousewheel: function (e) {
                 if ( e.wheelDelta > 0 )
                     e.types = [['wheel', ['up']]]
@@ -220,7 +225,7 @@ define('Mouse',['Button'], function (Button) {
                 else if ( e.wheelDeltaX < 0 )
                     e.types[0].push(['right'])
 
-                self.sequence(e)
+                // self.sequence(e)
                 self.update(e)
             },
             mouseover: function (e) {
@@ -228,14 +233,16 @@ define('Mouse',['Button'], function (Button) {
                     self.active = true
                     self.update(e)
                 }
-                e.types = [['over']]
+                e.types = ['over']
+                e.name = 'over'
             },
             mouseout: function (e) {
                 if (e.relatedTarget === null) {
                     self.active = false
                     self.update(e)
                 }
-                e.types = [['out']]
+                e.types = ['out']
+                e.name = 'out'
             }
             /*FIXEME: the contextmenu prevents any events from being triggerd if they occur over it. This often leads to miscalculated `mouse.buttons`.
             contextmenu : function (e) {
