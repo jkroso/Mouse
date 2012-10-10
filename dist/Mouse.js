@@ -1,4 +1,4 @@
-/*! Mouse - v0.1.0 - 2012-10-06
+/*! Mouse - v0.1.0 - 2012-10-11
 * https://github.com/jkroso/Mouse
 * Copyright (c) 2012 Jakeb Rosoman; Licensed MIT */
 

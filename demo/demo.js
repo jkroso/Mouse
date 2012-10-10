@@ -1,16 +1,7 @@
-require.config({
-    baseUrl: '../',
-    shim : {
-        jQuery: {
-            exports: '$'
-        }
-    },
-    paths : {
-        jQuery: '/Libraries/jquery-latest'
-    }
-})
-// This example is working with jquery. Though the library was originally designed to work with adept.js. It would also work with Ender.js, Zepto and others
-require(['../Dom411/src/Dom411', 'jQuery', 'src/Mouse'], function (Dom411, $) {
+define([
+    '../../Dom411/src/Dom411',
+    '../src/Mouse'
+], function (Dom411, Mouse) {'use strict';
     var total, timer, top, left
 
     // This causes just a single dom event listener
@@ -41,24 +32,44 @@ require(['../Dom411/src/Dom411', 'jQuery', 'src/Mouse'], function (Dom411, $) {
         this.style.left = (left += e.movementX) + 'px'
     }
 
-    // Using only native events, though, enhanced by jquery
-    $('#list3 > .item').on('mousedown', function (e) {
-        start.call(this, e)
-        lastEvent = e
-        var dragHandler = jqMove.bind(this)
-        $(document.body)
-            .on('mousemove', dragHandler)
-            .one('mouseup', function (e) {
+    Array.prototype.slice.call(document.querySelectorAll('#list3 > .item')).forEach(function (node) {
+        node.addEventListener('mousedown', function (e) {
+            var self = this
+            start.call(this, e)
+            var lastEvent = e
+            document.body.addEventListener('mousemove', dragHandler, true)
+            document.body.addEventListener('mouseup', mouseup, true)
+            function mouseup (e) {
                 stop(e)
-                $(document.body).off('mousemove', dragHandler)
-            })
+                document.body.removeEventListener('mousemove', dragHandler, true)
+                document.body.removeEventListener('mouseup', mouseup, true)
+            }
+            function dragHandler (e) {
+                total++
+                self.style.top = (top += e.clientY - lastEvent.clientY) + 'px'
+                self.style.left = (left += e.clientX - lastEvent.clientX) + 'px'
+                lastEvent = e
+            }
+        }, true)
     })
 
-    var lastEvent
-    function jqMove (e) {
-        total++
-        this.style.top = (top += e.clientY - lastEvent.clientY) + 'px'
-        this.style.left = (left += e.clientX - lastEvent.clientX) + 'px'
-        lastEvent = e
-    }
+    // Using only native events, though, enhanced by jquery
+    // $('#list3 > .item').on('mousedown', function (e) {
+    //     start.call(this, e)
+    //     lastEvent = e
+    //     var dragHandler = jqMove.bind(this)
+    //     $(document.body)
+    //         .on('mousemove', dragHandler)
+    //         .one('mouseup', function (e) {
+    //             stop(e)
+    //             $(document.body).off('mousemove', dragHandler)
+    //         })
+    // })
+    // var lastEvent
+    // function jqMove (e) {
+    //     total++
+    //     this.style.top = (top += e.clientY - lastEvent.clientY) + 'px'
+    //     this.style.left = (left += e.clientX - lastEvent.clientX) + 'px'
+    //     lastEvent = e
+    // }
 })
