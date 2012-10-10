@@ -71,8 +71,8 @@ define(['./Button'], function (Button) { 'use strict';
                 self.update(e)
             },
             mousemove : function (e) {
-                e.movementX = e.webkitMovementX
-                e.movementY = e.webkitMovementY
+                e.movementX = e.x - self.last.x
+                e.movementY = e.y - self.last.y
                 // Some browsers fire move events when they shouldn't
                 if ( !(e.movementX || e.movementY) ) {
                     e.stopPropagation()

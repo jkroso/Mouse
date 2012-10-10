@@ -23,13 +23,13 @@
 			span {
 				margin: 4px;
 			}
-			#list1 {
+			#Direct {
 				background: #CCECFF;
 			}
-			#list2 {
+			#Native {
 				background: #E1BDBD;
 			}
-			#list3 {
+			#Delegated {
 				background: #FFF75E;
 			}
 			ul .item {
@@ -41,13 +41,17 @@
 				cursor: move;
 			}
 		</style>
+		<script type="text/javascript">
+			var require = {shim:{'../vendor/happen':{exports:'happen'}}}
+		</script>
 		<script data-main="demo" src="../vendor/require.js"></script>
 	</head>
 	<body>
 		<div id="counter">
 			<span id="count">0</span><span>Ops/sec</span>
 		</div>
-		<ul id="list1">
+		<h1>Native; timers run before Mouse was loaded onto the page</h1>
+		<ul id="Native">
 			<li class="item">One</li>
 			<li class="item">Two</li>
 			<li class="item">Three</li>
@@ -55,7 +59,8 @@
 			<li class="item">Five</li>
 			<li class="item">Six</li>
 		</ul>
-		<ul id="list2">
+		<h1>Dom411 direct bound</h1>
+		<ul id="Direct">
 			<li class="item">One</li>
 			<li class="item">Two</li>
 			<li class="item">Three</li>
@@ -63,7 +68,8 @@
 			<li class="item">Five</li>
 			<li class="item">Six</li>
 		</ul>
-		<ul id="list3">
+		<h1>DOM411 Delegated</h1>
+		<ul id="Delegated">
 			<li class="item">One</li>
 			<li class="item">Two</li>
 			<li class="item">Three</li>
