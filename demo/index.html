@@ -3,10 +3,13 @@
 		<style type="text/css">
 			body {
 				-webkit-user-select: none;
+				font-family: Verdana;
+				font-size: 12px;
 			}
 			ul {
-				width: 200px;
-				margin: 50px auto;
+				width: 160px;
+				padding: 10px;
+				margin: 0px auto;
 			}
 			#counter {
 				position: fixed;
@@ -40,6 +43,16 @@
 				background: #ccc;
 				cursor: move;
 			}
+			.result {
+				padding: 10px;
+				background: white;
+				margin: 5px;
+			}
+			.time {
+				font-weight: bold;
+				display: block;
+				font-size: 1.5em;
+			}
 		</style>
 		<script type="text/javascript">
 			var require = {shim:{'../vendor/happen':{exports:'happen'}}}
@@ -48,6 +61,7 @@
 	</head>
 	<body>
 		<div id="counter">
+			<button>Rerun</button>
 			<span id="count">0</span><span>Ops/sec</span>
 		</div>
 		<h1>Native; timers run before Mouse was loaded onto the page</h1>

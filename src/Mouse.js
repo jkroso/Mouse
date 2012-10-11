@@ -21,7 +21,7 @@ define(['./Button'], function (Button) { 'use strict';
         this.down = null // `this.down` will become a singly linked list of active buttons
         this.buttons = 0
         this.lastActivity = Date.now()
-        this.last = undefined
+        this.last = {x:0,y:0},
         Object.defineProperties(this, {
             _beforeMove : {
                 value : new Array, 
@@ -34,7 +34,7 @@ define(['./Button'], function (Button) { 'use strict';
         })
         
         // `this` will refer to a DOM element when triggered
-        var stateHandlers = {
+        this.stateHandlers = {
             // click: function (e) {
             //     // e.preventDefault()
             //     // e.stopPropagation()
@@ -158,14 +158,23 @@ define(['./Button'], function (Button) { 'use strict';
             }*/
         }
 
-        // Bind events to the DOM
-        Object.keys(stateHandlers).forEach(function ( type ) {
-            view.addEventListener(type, stateHandlers[type], true)
-        })
+        this.on()
     }
 
     Mouse.prototype = {
         constructor : Mouse,
+        // Start tracking
+        on : function () {
+            Object.keys(this.stateHandlers).forEach(function ( type ) {
+                this.view.addEventListener(type, this.stateHandlers[type], true)
+            }, this)
+        },
+        // Stop tracking
+        off : function () {
+            Object.keys(this.stateHandlers).forEach(function ( type ) {
+                this.view.removeEventListener(type, this.stateHandlers[type], true)
+            }, this)
+        },
         // Maintain a singly linked list of successive events
         sequence : function (e) {
             if ( e.timeStamp - this.lastActivity < 350 ) {
@@ -173,7 +182,6 @@ define(['./Button'], function (Button) { 'use strict';
                 e.types.push([sequence(e)])
             }
         },
-        
         update : function (e) {
             this.last = e
             this.lastActivity = e.timeStamp
@@ -221,14 +229,14 @@ define(['./Button'], function (Button) { 'use strict';
         return result.join(',')
     }
 
-    // Why not re-use the constructor as an instance
-    Mouse.call(Mouse, window)
     Object.keys(Mouse.prototype).forEach(function(key) {
         Object.defineProperty(Mouse, key, { 
             value : Mouse.prototype[key] 
         })
         Object.defineProperty(Mouse.prototype, key, { enumerable: false })
     })
+    // Why not re-use the constructor as an instance
+    Mouse.call(Mouse, window)
     
     if ( typeof Window !== 'undefined' )
         Window.prototype.Mouse = Mouse

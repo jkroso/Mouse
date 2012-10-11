@@ -5,15 +5,16 @@ define([
 ], function (Dom411, happen, require) {
     'use strict';
     var total, timer, top, left
+    window.Dom411 = Dom411
 
     // This causes just a single dom event listener
-    Dom411('#Direct')
+    Dom411('#Direct > .item')
         .on('grab.left', start)
         .on('drag.left', move)
         .on('drop.left', stop)
     
     // This causes one listener to be bound to each list item
-    Dom411('#Delegated > .item')
+    Dom411('#Delegated')
         .delegate('.item', 'grab.left', start)
         .delegate('.item', 'drag.left', move)
         .delegate('.item', 'drop.left', stop)
@@ -110,23 +111,43 @@ define([
         return Date.now() - start
     }
 
-    document.getElementById('Native').innerHTML += '<div class="result">Completed 100 - grab, move:50px, drop - cycles in '+
-        timeDrag(document.getElementById('Native').children[0], 100, 50)+
-        ' ms</div>'
-    document.getElementById('Native').innerHTML += '<div class="result">Completed 100 - grab, move:500px, drop - cycles in '+
-        timeDrag(document.getElementById('Native').children[0], 100, 500)+
-        ' ms</div>'
+    function insertResult (el, cycles, distance) {
+        var node = document.createElement('div')
+        node.innerHTML= cycles*2+
+        ' grab, move: '+distance+'px, drop cycles'+
+        ' completed in <span class="time">'+timeDrag(el.children[0], cycles, distance)+'ms</span>'
+        node.className = 'result'
+        el.appendChild(node)
+    }
 
+    function test (el) {
+        insertResult(el, 50, 10)
+        insertResult(el, 50, 500)
+    }
+
+    function rerunAll () {
+        var native = document.getElementById('Native')
+        Dom411('ul').each(function () {
+            Array.prototype.slice.call(this.querySelectorAll('.result')).forEach(function (node) {
+                node.parentElement.removeChild(node)
+            })
+        })
+        window.mouse.off()
+        test(native)
+        window.mouse.on()
+        Dom411('ul').subtract(native).each(function () {
+            test(this)
+        })
+    }
+    // Allow test reruns
+    Dom411('#counter button')[0].addEventListener('click', rerunAll, true)
+
+    // Run initial tests
+    test(document.getElementById('Native'))
     // Now load Mouse onto the page and see what difference it makes
     require(['../src/Mouse'], function (Mouse) {
-        [1,2].forEach(function (list) {
-            list = document.getElementById(list === 1 ? 'Direct' : 'Delegated')
-            list.innerHTML += '<div class="result">Completed 100 - grab, move:50px, drop - cycles in '+
-                timeDrag(list.children[0], 100, 50)+
-                ' ms</div>'
-            list.innerHTML += '<div class="result">Completed 100 - grab, move:500px, drop - cycles in '+
-                timeDrag(list.children[0], 100, 500)+
-                ' ms</div>'
-        })
+        window.mouse = Mouse
+        test(document.getElementById('Direct'))
+        test(document.getElementById('Delegated'))
     })
 })
