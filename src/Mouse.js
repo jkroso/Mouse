@@ -35,11 +35,6 @@ define(['./Button'], function (Button) { 'use strict';
         
         // `this` will refer to a DOM element when triggered
         this.stateHandlers = {
-            // click: function (e) {
-            //     // e.preventDefault()
-            //     // e.stopPropagation()
-            //     // e.stopImmediatePropagation()
-            // },
             mousedown : function (e) {
                 // Add the button to the front of a linked list of active buttons
                 if ( self.down )
@@ -54,16 +49,16 @@ define(['./Button'], function (Button) { 'use strict';
             mouseup : function (e) {
                 // Remove the corresponding down event from the daisy chain of active buttons
                 var downEvent = self.down
-                if ( downEvent.which === e.which ) {
-                    self.down = downEvent.previousDown
-                } else {
-                    do {
-                        if ( downEvent.previousDown.which === e.which ) {
-                            downEvent.previousDown = downEvent.previousDown.previousDown
-                            break
-                        }
-                    } while ( downEvent = downEvent.previousDown )
-                }
+                // if ( downEvent.which === e.which ) {
+                //     self.down = downEvent.previousDown
+                // } else {
+                //     do {
+                //         if ( downEvent.previousDown.which === e.which ) {
+                //             downEvent.previousDown = downEvent.previousDown.previousDown
+                //             break
+                //         }
+                //     } while ( downEvent = downEvent.previousDown )
+                // }
                 // Delegate the event to the correct button
                 // self.sequence()
                 self[self.buttons].onUp(e)
@@ -82,10 +77,8 @@ define(['./Button'], function (Button) { 'use strict';
                 // If the mouse is being dragged
                 if ( self.buttons ) {
                     self[self.buttons].onMove(e)
-                    // e.stopPropagation()
-                    // e.stopImmediatePropagation()
                 }
-                var i, moveEvents = ['move']
+                var moveEvents = ['move']
                 
                 if ( e.movementY > 0 )
                     moveEvents.push(['up'])
@@ -98,18 +91,19 @@ define(['./Button'], function (Button) { 'use strict';
                     moveEvents.push(['left'])
                     
                 e.types = [moveEvents]
-                // Check if any actions are to be applied before the move event is published
-                if ( i = self._beforeMove.length ) {
-                    // De-ref the listener array now in case one of them mutates the array
-                    moveEvents = self._beforeMove // re-using the variable
-                    do {
-                        moveEvents[--i](e, self)
-                    } while ( i )
-                }
                 
                 self.x = e.x
                 self.y = e.y
                 self.update(e)
+                
+                // // Check if any actions are to be applied before the move event is published
+                // if ( i = self._beforeMove.length ) {
+                //     // De-ref the listener array now in case one of them mutates the array
+                //     moveEvents = self._beforeMove // re-using the variable
+                //     do {
+                //         moveEvents[--i](e, self)
+                //     } while ( i )
+                // }
             },
             // drag : function (e) {
             //     var dragAspects = self._beforeDrag,
@@ -176,58 +170,58 @@ define(['./Button'], function (Button) { 'use strict';
             }, this)
         },
         // Maintain a singly linked list of successive events
-        sequence : function (e) {
-            if ( e.timeStamp - this.lastActivity < 350 ) {
-                e.previous = this.last
-                e.types.push([sequence(e)])
-            }
-        },
+        // sequence : function (e) {
+        //     if ( e.timeStamp - this.lastActivity < 350 ) {
+        //         e.previous = this.last
+        //         e.types.push([sequence(e)])
+        //     }
+        // },
         update : function (e) {
             this.last = e
             this.lastActivity = e.timeStamp
         },
 
-        addAspect : function (type, action) {
-            var array
-            if ( typeof action !== 'function' )
-                throw 'action must be a function'
-            switch ( type ) {
-                case 'move':
-                    array = this._beforeMove = this._beforeMove.slice()
-                    break
-                case 'drag':
-                    array = this._beforeDrag = this._beforeDrag.slice()
-                    break
-            }
-            return array.unshift(action)
-        },
+        // addAspect : function (type, action) {
+        //     var array
+        //     if ( typeof action !== 'function' )
+        //         throw 'action must be a function'
+        //     switch ( type ) {
+        //         case 'move':
+        //             array = this._beforeMove = this._beforeMove.slice()
+        //             break
+        //         case 'drag':
+        //             array = this._beforeDrag = this._beforeDrag.slice()
+        //             break
+        //     }
+        //     return array.unshift(action)
+        // },
         
-        removeAspect : function (type, action) {
-            var array
-            switch ( type ) {
-                case 'move':
-                    array = this._beforeMove.filter(function (func) {
-                        return func === action || func.name === action
-                    })
-                    break
-                case 'drag':
-                    array = this._beforeDrag.filter(function (func) {
-                        return func === action || func.name === action
-                    })
-                    break
-            }
-            return array.length
-        }
+        // removeAspect : function (type, action) {
+        //     var array
+        //     switch ( type ) {
+        //         case 'move':
+        //             array = this._beforeMove.filter(function (func) {
+        //                 return func === action || func.name === action
+        //             })
+        //             break
+        //         case 'drag':
+        //             array = this._beforeDrag.filter(function (func) {
+        //                 return func === action || func.name === action
+        //             })
+        //             break
+        //     }
+        //     return array.length
+        // }
     }
 
-    function sequence (e) {
-        var result = [e.name]
-        while ( e.previous ) {
-            e = e.previous
-            result.unshift(e.name)
-        }
-        return result.join(',')
-    }
+    // function sequence (e) {
+    //     var result = [e.name]
+    //     while ( e.previous ) {
+    //         e = e.previous
+    //         result.unshift(e.name)
+    //     }
+    //     return result.join(',')
+    // }
 
     Object.keys(Mouse.prototype).forEach(function(key) {
         Object.defineProperty(Mouse, key, { 

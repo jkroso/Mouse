@@ -22,8 +22,7 @@ To take advantage of these events though you need to use a DOM library plugin wh
 The better your events the less code need
 
 ## Performance
-My tests show that Mouse causes a 40-65% speed decrease for event heavy tasks such as mouse dragging in chrome. Firefox must have a higher cost of binding and unbinding events to the DOM (with Dom411 that doesn't often happen) as it showed less of a performance drop at 10-65%.  
-I tested with short drags of 50px and long drags of 500px. The ranges shown can be read as short-long%. Suprisingly delegated events seems to be as fast if not faster than directly bound events in these tests.
+Varies greatly cross browser. The worst case senario is while dragging since these are custom events and fired rapidly. Mouse captures the native move event. Destroys it. Then fires a new one. So two events fire for every mouse movement. This is the use case I have done my performance tests on and they showed around a 20-50% speed decrease. No suprise there. However, in Firefox it was actually twice as fast as native. I am putting this down to Firefox having a higher cost of binding and unbinding DOM events (you don't do it very often when your using a better event system). Suprisingly delegated events seems to be faster in firefox and almost as fast in chrome as directly bound events.
 
 ##Example
 This library alone can't do much but check out the [demo][demo] to see it in action when combined with a DOM library and appropriate event manager

@@ -55,7 +55,13 @@
 			}
 		</style>
 		<script type="text/javascript">
-			var require = {shim:{'../vendor/happen':{exports:'happen'}}}
+			var require = {
+				shim:{'../vendor/happen':{exports:'happen'}},
+				paths:{
+					Mouse:'../dist/Mouse.min',
+					Dom411: '../../Dom411/dist/Dom411.min'
+				}
+			}
 		</script>
 		<script data-main="demo" src="../vendor/require.js"></script>
 	</head>
@@ -64,7 +70,7 @@
 			<button>Rerun</button>
 			<span id="count">0</span><span>Ops/sec</span>
 		</div>
-		<h1>Native; timers run before Mouse was loaded onto the page</h1>
+		<h1>Native (run without mouse active)</h1>
 		<ul id="Native">
 			<li class="item">One</li>
 			<li class="item">Two</li>

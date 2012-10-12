@@ -1,8 +1,9 @@
-define([
-    '../../Dom411/src/Dom411',
+require([
+    'Mouse',
+    'Dom411',
     '../vendor/happen',
-    'require'
-], function (Dom411, happen, require) {
+    '../../q/q'
+], function (Mouse, Dom411, happen, Q) {
     'use strict';
     var total, timer, top, left
     window.Dom411 = Dom411
@@ -37,17 +38,20 @@ define([
 
     Array.prototype.slice.call(document.querySelectorAll('#Native > .item')).forEach(function (node) {
         node.addEventListener('mousedown', function (e) {
+            if (e.which !== 1) return
             var self = this
             start.call(this, e)
             var lastEvent = e
             document.body.addEventListener('mousemove', dragHandler, true)
             document.body.addEventListener('mouseup', mouseup, true)
             function mouseup (e) {
+                if (e.which !== 1) return
                 stop(e)
                 document.body.removeEventListener('mousemove', dragHandler, true)
                 document.body.removeEventListener('mouseup', mouseup, true)
             }
             function dragHandler (e) {
+                if (e.which !== 1) return
                 total++
                 self.style.top = (top += e.clientY - lastEvent.clientY) + 'px'
                 self.style.left = (left += e.clientX - lastEvent.clientX) + 'px'
@@ -121,33 +125,46 @@ define([
     }
 
     function test (el) {
-        insertResult(el, 50, 10)
-        insertResult(el, 50, 500)
+        return Q.all([
+            function () {
+                var d = Q.defer()
+                setTimeout(function () {
+                    insertResult(el, 500, 10)
+                    d.resolve()
+                }, 50)
+                return d.promise
+            }(),
+            function () {
+                var d = Q.defer()
+                setTimeout(function () {
+                    insertResult(el, 50, 500)
+                    d.resolve()
+                }, 1000)
+                return d.promise
+            }()
+        ])
     }
 
-    function rerunAll () {
-        var native = document.getElementById('Native')
+    function runAll () {
         Dom411('ul').each(function () {
             Array.prototype.slice.call(this.querySelectorAll('.result')).forEach(function (node) {
                 node.parentElement.removeChild(node)
             })
         })
-        window.mouse.off()
-        test(native)
-        window.mouse.on()
-        Dom411('ul').subtract(native).each(function () {
-            test(this)
-        })
+        Mouse.off()
+        test(document.getElementById('Native'))
+            .then(function (val) {
+                return Q.fcall(Mouse.on.bind(Mouse))
+            })
+            .then(function () {
+                return test(document.getElementById('Direct'))
+            })
+            .then(function () {
+                return test(document.getElementById('Delegated'))
+            })
     }
-    // Allow test reruns
-    Dom411('#counter button')[0].addEventListener('click', rerunAll, true)
+    // Allow test reruns. These could show up browser optimisations
+    Dom411('#counter button')[0].addEventListener('click', runAll, true)
 
-    // Run initial tests
-    test(document.getElementById('Native'))
-    // Now load Mouse onto the page and see what difference it makes
-    require(['../src/Mouse'], function (Mouse) {
-        window.mouse = Mouse
-        test(document.getElementById('Direct'))
-        test(document.getElementById('Delegated'))
-    })
+    runAll()
 })
