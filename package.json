@@ -1,6 +1,5 @@
 {
 	"name": "Mouse",
-	"title": "Mouse",
 	"description": "Mouse state and event manager",
 	"version": "0.1.0",
 	"homepage": "https://github.com/jkroso/Mouse",
@@ -22,7 +21,16 @@
 		}
 	],
 	"dependencies": {
-		"grunt-requirejs": ""
+	},
+	"devDependencies" : {
+		"laissez-faire": "",
+		"promises": "",
+		"dom411": "",
+		"bigfile": ""
+	},
+	"scripts": {
+		"demo": "bigfile -e demo/demo.js -w demo/built.js -lb",
+		"build": "bigfile -w dist/Mouse.js -pc -x Mouse"
 	},
 	"keywords": []
 }
